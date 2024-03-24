@@ -5,6 +5,7 @@ namespace Day3.Repositories
 {
     public class AppDbContext:DbContext
     {
+        public DbSet<UserModel> Users { get; set; }
         public DbSet<Student> Students { get; set; }
         public DbSet<Adress> Adresses { get; set; }
 
