@@ -7,6 +7,7 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+ 
 
 // Add services to the container.
 builder.Services.AddScoped(typeof(IUserRepository), typeof(UserRepository));
