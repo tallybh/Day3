@@ -1,4 +1,5 @@
-﻿using Day3.Models;
+﻿using Day3.Contracts;
+using Day3.Models;
 using Day3.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,46 +8,63 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Day3.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class StudentsController : ControllerBase
     {
+        private IStudentsRepository _repository;
         private AppDbContext _context;
-        public StudentsController(AppDbContext context) {
+        public StudentsController(AppDbContext context, IStudentsRepository repository) {
             _context = context;
+            _repository = repository;
         }
         
         // GET: api/<StudentsController>
         [HttpGet]
-        public IEnumerable<Student> Get()
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Student>))]
+        public async Task<IActionResult> Get()
         {
-            return _context.Students;
+            var students =  await _repository.GetAllstudents();
+            return Ok(students);
         }
 
         // GET api/<StudentsController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Student))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Get(int id)
         {
-            return "value";
+            var student = await _repository.GetStudentById(id);
+            return student == null ? NotFound() : Ok(student); 
         }
 
         // POST api/<StudentsController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> Post([FromBody] Student s)
         {
+            await _repository.AddNewStudent(s);
+            return Ok();
         }
 
         // PUT api/<StudentsController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> Put(int id,[FromBody] Student s)
         {
+            await _repository.Update(s);
+            return Ok();
         }
 
         // DELETE api/<StudentsController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Delete(int id)
         {
+            var result = await _repository.Delete(id);
+            return result ? Ok():NotFound();
         }
     }
 }
